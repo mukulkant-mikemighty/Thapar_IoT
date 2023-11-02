@@ -1,0 +1,7 @@
+YouTube Video : https://www.youtube.com/watch?v=h-jqF8Y5iV4
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json (Don't Use this)  [Alternate link: Alt1]
+https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers [SiLab CP2102 in our case]
+
+
+
+Alt1: https://dl.espressif.com/dl/package_esp32_index.json

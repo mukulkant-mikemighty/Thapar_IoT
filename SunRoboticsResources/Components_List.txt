@@ -1,0 +1,33 @@
+Chassis:-
+1) Weighing scale chassis
+
+Components:- Assemble + Programmeble Arduino (for 20kg)
+2) 1 x Arduino Uno R3 Compatible Board    
+3) 1 x Hx711  ADC Module
+4) 1 x LCD KEYPAD SHIELD
+5) 2 x 4 Pin JST XH connector 2.54mm Pitch Male and Female (SKU:10173)
+6) 1 x 2 Pin JST XH connector 2.54mm Pitch Male and Female (SKU:10175)
+7) 1 x 2 Pin Relimate JST Connector 2.54mm Pitch Male and Female (SKU:10174)
+6) 1 x Load Cell
+7) 1 x USB cable
+8) 1 x 18650 Battery Holder with DC Jack
+9) 2 x 18650 battery cell
+10) 1 x 18650 battery charger
+
+Box:-
+11) SUN-LAB corugated box
+
+Sticker:-
+12) Box-Sticker
+13) SKU Sticker
+14) QR-Code Sticker
+15) QC-Sticker
+
+Getting Started:-
+16) Arduino Getting Started
+
+
+
+
+
+

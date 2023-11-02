@@ -1,0 +1,2 @@
+1> Weight (in kg.) Display On LCD16x2 and also weight tare with RST button
+
