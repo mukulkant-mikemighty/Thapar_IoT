@@ -258,7 +258,7 @@ void setup()
   SPI.begin();          /*SPI communication initialized*/
   mfrc522.PCD_Init();   /*RFID sensor initialized*/
   pinMode(LED_G, OUTPUT);  /*LED Pin set as output*/
-  
+  //pinMode(2,INPUT);
   ////////
   ////////
   /*
@@ -341,8 +341,9 @@ void loop()
   readCard();
   //Serial.printf(" "+readCard());
   
-
-
+  Serial.println(" ");
+  float moisture= analogRead(2);
+  Serial.println(moisture);
 
   reading_id++;
   myData.reading_id=reading_id;
