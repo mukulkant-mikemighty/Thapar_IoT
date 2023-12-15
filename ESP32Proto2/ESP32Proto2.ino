@@ -1,4 +1,4 @@
-#include <esp_now.h>
+//#include <esp_now.h>
 #include <esp_wifi.h>
 #include <WiFi.h>
 #include <SPI.h>
@@ -18,13 +18,13 @@
 #define RST_PIN 22  /*Reset Pin for RC522*/
 #define LED_G   12   /*Pin 8 for LED*/
 // Set your Board ID (ESP32 Sender #1 = BOARD_ID 1, ESP32 Sender #2 = BOARD_ID 2, etc)
-#define BOARD_ID 2
+#define BOARD_ID  2 
 
 
-#define WIFI_SSID "REPLACE_WITH_YOUR_SSID"/////////////////////////do
-#define WIFI_PASSWORD "REPLACE_WITH_YOUR_PASSWORD"/////////////////do
-#define API_KEY "REPLACE_WITH_YOUR_FIREBASE_PROJECT_API_KEY"///////do
-#define DATABASE_URL "REPLACE_WITH_YOUR_FIREBASE_DATABASE_URL"/////do
+#define WIFI_SSID "Galaxy M31"/////////////////////////do
+#define WIFI_PASSWORD "12345678"/////////////////do
+#define API_KEY "AIzaSyCYQbeu1lp0lBBBwaTL1sBf7Y78a8S9Hiw"///////do
+#define DATABASE_URL "https://farmer-2c012-default-rtdb.firebaseio.com"/////do
 
 
 
@@ -46,7 +46,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   /*Create MFRC522 initialized*/
 //Must match the receiver structure
 typedef struct struct_message {
   int board_id;
-  float per_unit_weight;
+  int weight;
+  int moisture;
   unsigned int reading_id;
   char rfid_id[9];
   //String rfid_id;
@@ -79,6 +80,9 @@ void readCard() {
   for(byte i=0; i < mfrc522.uid.size; i++){
     Serial.printf("%x",myData.rfid_id[i]);
   }
+  //delay(2000);
+  //return rfid_id;
+
 }
 
 
@@ -100,7 +104,8 @@ void setup()
   
   /* Assign the api key (required) */
   config.api_key = API_KEY;
-
+  auth.user.email = "akathuria_be20@thapar.edu";
+  auth.user.password = "btsjungkook";
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
   
@@ -144,57 +149,33 @@ void loop()
   ////////
   ////////
   myData.board_id = BOARD_ID;
-  
+  //myData.board_id = myData.board_id.c_str();
   Serial.print("Weight: "+Serial2.readString());
+  myData.weight=(int)(Serial2.readString().toFloat() * 1000);
+  //delay(2000);
   //Serial.print();
   Serial.println(" ");
   readCard();
+  String RFID=myData.rfid_id;
   //Serial.printf(" "+readCard());
   
-  Serial.println(" ");
-  float moisture= analogRead(2);
+  //Serial.println(" ");
+  int moisture=0;
+  moisture= analogRead(2);
   Serial.println(moisture);
+  myData.moisture=moisture;
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
-    if (Firebase.RTDB.setInt(&fbdo, "test/board_id", BOARD_ID)) {
-    Serial.println("PASSED");
-    Serial.println("PATH: " + fbdo.dataPath());
-    Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-    Serial.println("FAILED");
-    Serial.println("REASON: " + fbdo.errorReason());
-    }
+    
 
-    if (Firebase.RTDB.setString(&fbdo, "test/weight", Serial2.readString())) {
-    Serial.println("PASSED");
-    Serial.println("PATH: " + fbdo.dataPath());
-    Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-    Serial.println("FAILED");
-    Serial.println("REASON: " + fbdo.errorReason());
-    }
-
-
-    if (Firebase.RTDB.setFloat(&fbdo, "test/moisture", moisture)) {
-    Serial.println("PASSED");
-    Serial.println("PATH: " + fbdo.dataPath());
-    Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-    Serial.println("FAILED");
-    Serial.println("REASON: " + fbdo.errorReason());
-    }
+    
 
 
   }
 
-  reading_id++;
-  myData.reading_id=reading_id;
 
-  if (Firebase.RTDB.setInt(&fbdo, "test/reading_id", myData.reading_id)) {
+  if (Firebase.RTDB.setString(&fbdo, "userDataRecords/RFID", myData.rfid_id)) {
     Serial.println("PASSED");
     Serial.println("PATH: " + fbdo.dataPath());
     Serial.println("TYPE: " + fbdo.dataType());
@@ -204,4 +185,50 @@ void loop()
     Serial.println("REASON: " + fbdo.errorReason());
     }
 
+
+    if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/weight", myData.weight)) {
+    Serial.println("PASSED");
+    Serial.println("PATH: " + fbdo.dataPath());
+    Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else {
+    Serial.println("FAILED");
+    Serial.println("REASON: " + fbdo.errorReason());
+    }
+
+
+    if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/moisture", myData.moisture)) {
+    Serial.println("PASSED");
+    Serial.println("PATH: " + fbdo.dataPath());
+    Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else {
+    Serial.println("FAILED");
+    Serial.println("REASON: " + fbdo.errorReason());
+    }
+
+  reading_id++;
+  myData.reading_id=reading_id;
+
+  if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/reading_id", myData.reading_id)) {
+    Serial.println("PASSED");
+    Serial.println("PATH: " + fbdo.dataPath());
+    Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else {
+    Serial.println("FAILED");
+    Serial.println("REASON: " + fbdo.errorReason());
+    }
+
+
+
+
+    
+
+
+
+
+
+
+  delay(1500);
 }
