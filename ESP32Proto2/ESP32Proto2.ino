@@ -49,7 +49,7 @@ typedef struct struct_message {
   int weight;
   int moisture;
   unsigned int reading_id;
-  char rfid_id[9];
+  long int rfid_id;
   //String rfid_id;
   //String rfid_id;
 } struct_message;
@@ -66,23 +66,35 @@ unsigned int reading_id = 0;
 void readCard() {
   /*Show UID for Card/Tag on serial monitor*/
   Serial.print("UID tag: ");
-  char content[9]; 
+  char content[9];
+  char rfid_id[9]; 
   //String content="";
   if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) return;
   
   for (byte i=0; i < mfrc522.uid.size; i++) {
     //Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
     //Serial.print(mfrc522.uid.uidByte[i], HEX);
-    myData.rfid_id[i] = mfrc522.uid.uidByte[i];
+    rfid_id[i] = mfrc522.uid.uidByte[i];
     Serial.printf("%x",mfrc522.uid.uidByte[i]);
   }
   Serial.print("\n");
   for(byte i=0; i < mfrc522.uid.size; i++){
-    Serial.printf("%x",myData.rfid_id[i]);
+    Serial.printf("%x",rfid_id[i]);
   }
   //delay(2000);
   //return rfid_id;
-
+  long int result=0;
+  for (int i=0; i<mfrc522.uid.size; i++) {
+        if (rfid_id[i]>=48 && rfid_id[i]<=57)
+        {
+            result += (rfid_id[i]-48)*pow(16,mfrc522.uid.size-i-1);
+        } else if (rfid_id[i]>=65 && rfid_id[i]<=70) {
+            result += (rfid_id[i]-55)*pow(16,mfrc522.uid.size-i-1);
+        } else if (rfid_id[i]>=97 && rfid_id[i]<=102) {
+            result += (rfid_id[i]-87)*pow(16,mfrc522.uid.size-i-1);
+        }
+    }
+    myData.rfid_id=result;
 }
 
 
@@ -156,7 +168,7 @@ void loop()
   //Serial.print();
   Serial.println(" ");
   readCard();
-  String RFID=myData.rfid_id;
+  //long int RFID=myData.rfid_id;
   //Serial.printf(" "+readCard());
   
   //Serial.println(" ");
@@ -175,7 +187,7 @@ void loop()
   }
 
 
-  if (Firebase.RTDB.setString(&fbdo, "userDataRecords/RFID", myData.rfid_id)) {
+  if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/RFID", myData.rfid_id)) {
     Serial.println("PASSED");
     Serial.println("PATH: " + fbdo.dataPath());
     Serial.println("TYPE: " + fbdo.dataType());
