@@ -18,13 +18,14 @@
 #define RST_PIN 22  /*Reset Pin for RC522*/
 #define LED_G   12   /*Pin 8 for LED*/
 // Set your Board ID (ESP32 Sender #1 = BOARD_ID 1, ESP32 Sender #2 = BOARD_ID 2, etc)
-#define BOARD_ID  2 
+#define BOARD_ID  2
+#define Moisture_PIN 2
 
 
-#define WIFI_SSID "Galaxy M31"/////////////////////////do
-#define WIFI_PASSWORD "12345678"/////////////////do
+#define WIFI_SSID "mikemighty002"/////////////////////////do
+#define WIFI_PASSWORD "wewillrockyou020"/////////////////do
 #define API_KEY "AIzaSyCYQbeu1lp0lBBBwaTL1sBf7Y78a8S9Hiw"///////do
-#define DATABASE_URL "https://farmer-2c012-default-rtdb.firebaseio.com"/////do
+#define DATABASE_URL "https://farmer-2c012-default-rtdb.firebaseio.com/"/////do//https://farmer-2c012-default-rtdb.firebaseio.com/
 
 
 
@@ -39,7 +40,7 @@ FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
 int count = 0;
 bool signupOK = false;
-
+int i=0;
 MFRC522 mfrc522(SS_PIN, RST_PIN);   /*Create MFRC522 initialized*/
 
 //Structure example to send data
@@ -83,7 +84,8 @@ void readCard() {
   }
   //delay(2000);
   //return rfid_id;
-  long int result=0;
+  
+  int result=0;
   for (int i=0; i<mfrc522.uid.size; i++) {
         if (rfid_id[i]>=48 && rfid_id[i]<=57)
         {
@@ -96,8 +98,13 @@ void readCard() {
     }
     myData.rfid_id=result;
 }
-
-
+/*
+char path_rfid(){
+  char path_rfid=("Farmer/userDataRecords%d/RFID",i);
+  i++;
+  return path_rfid;
+} 
+*/
 
 void setup()
 {
@@ -114,14 +121,18 @@ void setup()
   Serial.println(WiFi.localIP());
   Serial.println();
   
+
+
   /* Assign the api key (required) */
   config.api_key = API_KEY;
   auth.user.email = "akathuria_be20@thapar.edu";
   auth.user.password = "btsjungkook";
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
-  
-  
+  //int p=0;
+  //char path_rfid="";
+
+
   
   SPI.begin();          /*SPI communication initialized*/
   mfrc522.PCD_Init();   /*RFID sensor initialized*/
@@ -172,10 +183,16 @@ void loop()
   //Serial.printf(" "+readCard());
   
   //Serial.println(" ");
+
   int moisture=0;
-  moisture= analogRead(2);
+  moisture= analogRead(Moisture_PIN);
   Serial.println(moisture);
-  myData.moisture=moisture;
+
+  int mappedValue = map(moisture, 0, 4095, 0, 255);
+  mappedValue = constrain(mappedValue, 60, 20);
+
+  Serial.println(mappedValue);
+  myData.moisture=mappedValue;
 
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
@@ -185,9 +202,20 @@ void loop()
 
 
   }
+  //const char rfid1[i]=path_rfid();
+  
+  if (Firebase.RTDB.setInt(&fbdo, "Farmer/userDataRecords/RFID" , myData.rfid_id)) {
+    Serial.println("PASSED");
+    Serial.println("PATH: " + fbdo.dataPath());
+    Serial.println("TYPE: " + fbdo.dataType());
+    }
+    else {
+    Serial.println("FAILED");
+    Serial.println("REASON: " + fbdo.errorReason());
+    }
+  
 
-
-  if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/RFID", myData.rfid_id)) {
+    if (Firebase.RTDB.setInt(&fbdo, "Farmer/userDataRecords/weight", myData.weight)) {
     Serial.println("PASSED");
     Serial.println("PATH: " + fbdo.dataPath());
     Serial.println("TYPE: " + fbdo.dataType());
@@ -198,18 +226,7 @@ void loop()
     }
 
 
-    if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/weight", myData.weight)) {
-    Serial.println("PASSED");
-    Serial.println("PATH: " + fbdo.dataPath());
-    Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-    Serial.println("FAILED");
-    Serial.println("REASON: " + fbdo.errorReason());
-    }
-
-
-    if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/moisture", myData.moisture)) {
+    if (Firebase.RTDB.setInt(&fbdo, "Farmer/userDataRecords/moisture", myData.moisture)) {
     Serial.println("PASSED");
     Serial.println("PATH: " + fbdo.dataPath());
     Serial.println("TYPE: " + fbdo.dataType());
@@ -222,7 +239,7 @@ void loop()
   reading_id++;
   myData.reading_id=reading_id;
 
-  if (Firebase.RTDB.setInt(&fbdo, "userDataRecords/reading_id", myData.reading_id)) {
+  if (Firebase.RTDB.setInt(&fbdo, "Farmer/userDataRecords/reading_id", myData.reading_id)) {
     Serial.println("PASSED");
     Serial.println("PATH: " + fbdo.dataPath());
     Serial.println("TYPE: " + fbdo.dataType());
